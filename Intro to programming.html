@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        /* CSS styles for table, forms, and buttons */
+        thead { color: Brown; }
+        tbody { color: rgb(100, 60, 60); }
+        tfoot { color: rgb(211, 32, 32); }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            width: 60%;
+            margin: 20px auto;
+        }
+        .green-text { color: green; }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+        }
+        input:checked + .slider { background-color: #2196F3; }
+        input:focus + .slider { box-shadow: 0 0 1px #2196F3; }
+        input:checked + .slider:before { transform: translateX(26px); }
+        .slider.round { border-radius: 34px; }
+        .slider.round:before { border-radius: 50%; }
+        button {
+            background-color: #0066cc; color: white;
+            padding: 10px 20px; font-size: 16px; border: none;
+            border-radius: 4px; cursor: pointer;
+        }
+        button:hover { background-color: #004080; }
+        input[type="text"], input[type="checkbox"], select, input[type="number"] {
+            width: calc(100% - 20px); padding: 10px; margin-bottom: 15px;
+            border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+        }   
+        td[colspan="3"] { text-align: center; }
+    </style>
+</head>
+
+<body>
+    <h2 class="green-text">Welcome To SFHS GPA Calculator</h2>
+
+    <div style="text-align: center;">
+        <button type="button" onclick="showCurrentForm()">Current GPA</button>
+        <button type="button" onclick="showCumulativeForm()">Cumulative GPA</button>
+        <button type="button" onclick="showGPAPlanningForm()">GPA Planning</button>
+        <button type="button" onclick="showQAndASection()">View Q & A</button>
+    </div>
+
+    <div id="currentGPAForm" style="display: block;">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:60%">Course Name</th>
+                    <th style="width:20%">Grade</th>
+                    <th style="width:40%">AP Course?</th>
+                </tr>
+            </thead>
+            <tbody id="courseTableBody">
+                <!-- Initial classes, rows will be added dynamically by JavaScript -->
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan=3 align="center">
+                        <button type="button" onclick="addCourse()">Add Course</button>
+                        <button type="button" onclick="calculateGPA()" id="calculateButton">Calculate GPA</button>
+                    </td>
+                </tr>
+                <tr>
+                    <th colspan=2 align="right" style="width:80%">Weighted GPA</th>
+                    <td><input type="text" id="weightedGrade" style="width:100%" readonly /></td>
+                </tr>
+                <tr>
+                    <th colspan=2 align="right" style="width:80%">Unweighted GPA</th>
+                    <td><input type="text" id="unweightedGrade" style="width:100%" readonly /></td>
+                </tr>
+            </tfoot>
+        </table>
+        <p id="introductoryText"> The credits in each class are crucially important to calculate your GPA. Here are the grade and the credits for the 2 courses that you can get:</p>
+        <p>AP/IB/DE</p>
+        <p>A = 5.0</p>
+        <p>B = 4.0</p>
+        <p>C = 3.0</p>
+        <p>F = 2.0</p>
+        <p>Regular/Honors</p>
+        <p>A = 4.0</p>
+        <p>B = 3.0</p>
+        <p>C = 2.0</p>
+        <p>F = 1.0</p>
+        <p id="introductoryText">To calculate, divide the total credits by the number of classes you are taking this year.</p>
+    </div>
+
+    <div id="cumulativeGPAForm" style="display: none;">
+        <label for="previousWeightedGPA">Enter last year's Weighted GPA:</label>
+        <input type="number" id="previousWeightedGPA" step="0.01" min="0" max="5">
+        <label for="previousUnweightedGPA">Enter last year's Unweighted GPA:</label>
+        <input type="number" id="previousUnweightedGPA" step="0.01" min="0" max="4">
+
+        <label for="currentWeightedGPA">Enter current year's Weighted GPA:</label>
+        <input type="number" id="currentWeightedGPA" step="0.01" min="0" max="5">
+        <label for="currentUnweightedGPA">Enter current year's Unweighted GPA:</label>
+        <input type="number" id="currentUnweightedGPA" step="0.01" min="0" max="4">
+
+        <button type="button" onclick="calculateCumulativeGPA()" id="calculateCumulativeButton">Calculate Cumulative GPA</button>
+        <table>
+            <tbody>
+                <tr>
+                    <th colspan="2" align="center">Cumulative GPAs</th>
+                </tr>
+                <tr>
+                    <th align="right">Weighted GPA</th>
+                    <td><input type="text" id="cumulativeWeightedGPA" readonly /></td>
+                </tr>
+                <tr>
+                    <th align="right">Unweighted GPA</th>
+                    <td><input type="text" id="cumulativeUnweightedGPA" readonly /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="gpaPlanningForm" style="display: none;">
+        <h3>GPA Planning Calculator</h3>
+        <!-- Corrected: Ensure inputs have different IDs for planning form -->
+        <label for="planningCurrentWeightedGPA">Current Weighted GPA:</label>
+        <input type="number" id="planningCurrentWeightedGPA" step="0.01" min="0" max="5">
+        <label for="planningCurrentUnweightedGPA">Current Unweighted GPA:</label>
+        <input type="number" id="planningCurrentUnweightedGPA" step="0.01" min="0" max="4">
+        <label for="targetWeightedGPA">Target Weighted GPA:</label>
+        <input type="number" id="targetWeightedGPA" step="0.01" min="0" max="5">
+        <label for="targetUnweightedGPA">Target Unweighted GPA:</label>
+        <input type="number" id="targetUnweightedGPA" step="0.01" min="0" max="4">
+        <button type="button" onclick="calculateRequiredGPA()" id="calculateRequiredButton">Calculate Required GPA</button>
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2" align="center">GPA Planning Results</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th align="right">Required Weighted GPA</th>
+                    <td><input type="text" id="requiredWeightedGPA" readonly /></td>
+                </tr>
+                <tr>
+                    <th align="right">Required Unweighted GPA</th>
+                    <td><input type="text" id="requiredUnweightedGPA" readonly /></td>
+                </tr>
+            </tbody>
+        </table>
+        <p id="gpaPlanningIntroText"> Some tips to improve your GPA: </p>
+        <p id="gpaPlanningIntroText"> Maybe take some fewer AP classes that you are struggling in. Something that people usually do is take a lot of AP classes just because of their friends, but only if you know you can handle it, take the classes </p>
+        <p id="gpaPlanningIntroText"> Try some Virtual classes or some Dual enrollment classes; it can help you understand which way you learn better, virtually or in person. Additionally, it gives you some extra time to study for other classes that you may need help with</p>
+        <p id="gpaPlanningIntroText"> Plan ahead for what classes you want to take so that you have your mind refreshed</p>
+        <p id="gpaPlanningIntroText"> Try some more effective ways of studying, whichever you may like </p>
+        <p id="gpaPlanningIntroText"> If you are skipping class a lot, it could be a big reason for your grade dropping; try attending the class more instead of self-studying </p>
+        <p id="gpaPlanningIntroText"> One last thing to note is that there is no proven way to increase your GPA, but this is just a little advice that might help </p>
+
+    </div>
+    <div id="qAndASection" style="display: none;">
+        <h2>Q & A</h2>
+        <div>
+            <h3>What struggles have you faced during coding and presentation?</h3>
+            <p>Answer: There were so many struggles like we couldn't get the dropdown to work at first every single time we ran our code we ran into multiple problems with it like one whole part was not working. The calculations were always off answers like that.</p>
+        </div>
+        <div>
+            <h3>What was the most challenging part of your project?</h3>
+            <p>Answer: The most challenging part was debugging the calculations. We had to ensure that the GPA calculations were accurate and that they accounted for various factors such as AP courses and different grading scales.</p>
+        </div>
+        <div>
+            <h3>How did you overcome the difficulties you encountered?</h3>
+            <p>Answer: We spent a lot of time debugging and testing our code. We also sought help from online resources and consulted with peers and instructors to resolve issues. Additionally, breaking down the problem into smaller tasks helped us tackle each issue systematically.</p>
+        </div>
+    </div>
+
+    <script>
+        let courseCount = 0;
+
+        function addCourse() {
+            courseCount++;
+            const table = document.getElementById('courseTableBody');
+            const row = table.insertRow();
+            const cell1 = row.insertCell(0);
+            const cell2 = row.insertCell(1);
+            const cell3 = row.insertCell(2);
+
+            cell1.innerHTML = `<input type="text" id="courseName${courseCount}" placeholder="Course Name" />`;
+            cell2.innerHTML = `<select id="courseGrade${courseCount}">
+                                    <option value="Select">Select Grade</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="F">F</option>
+                                </select>`;
+            cell3.innerHTML = `<label class="switch">
+                                    <input type="checkbox" id="APCourse${courseCount}">
+                                    <span class="slider round"></span>
+                                </label>`;
+        }
+
+        function calculateGPA() {
+            let totalWeightedGradePoints = 0.0;
+            let totalUnweightedGradePoints = 0.0;
+            let totalClasses = 0;
+
+            for (let i = 1; i <= courseCount; i++) {
+                const gradeSelect = document.getElementById(`courseGrade${i}`);
+                if (!gradeSelect || gradeSelect.value === "Select") continue;
+
+                const isAP = document.getElementById(`APCourse${i}`).checked;
+
+                let numericGrade = 0;
+                switch (gradeSelect.value) {
+                    case 'A': numericGrade = isAP ? 5.0 : 4.0; break;
+                    case 'B': numericGrade = isAP ? 4.0 : 3.0; break;
+                    case 'C': numericGrade = isAP ? 3.0 : 2.0; break;
+                    case 'F': numericGrade = isAP ? 2.0 : 1.0; break;
+                }
+
+                totalWeightedGradePoints += numericGrade;
+                totalUnweightedGradePoints += isAP ? numericGrade - 1 : numericGrade; // Subtract 1 for unweighted AP GPA
+                totalClasses++;
+            }
+
+            if (totalClasses > 0) {
+                const weightedGPA = roundToNearest(totalWeightedGradePoints / totalClasses, 0.01);
+                const unweightedGPA = roundToNearest(totalUnweightedGradePoints / totalClasses, 0.01);
+
+                document.getElementById('weightedGrade').value = weightedGPA.toFixed(2);
+                document.getElementById('unweightedGrade').value = unweightedGPA.toFixed(2);
+            } else {
+                alert("Please add courses.");
+            }
+        }
+
+        // Custom rounding function
+        function roundToNearest(value, increment) {
+            return Math.round(value / increment) * increment;
+        }
+
+        function calculateCumulativeGPA() {
+            const prevWeightedGPA = parseFloat(document.getElementById('previousWeightedGPA').value);
+            const prevUnweightedGPA = parseFloat(document.getElementById('previousUnweightedGPA').value);
+            const currentWeightedGPA = parseFloat(document.getElementById('currentWeightedGPA').value);
+            const currentUnweightedGPA = parseFloat(document.getElementById('currentUnweightedGPA').value);
+
+            if (isNaN(prevWeightedGPA) || isNaN(prevUnweightedGPA) || isNaN(currentWeightedGPA) || isNaN(currentUnweightedGPA)) {
+                alert('Please enter all previous and current GPA values.');
+                return;
+            }
+
+            const cumulativeWeightedGPA = ((prevWeightedGPA + currentWeightedGPA) / 2).toFixed(2);
+            const cumulativeUnweightedGPA = ((prevUnweightedGPA + currentUnweightedGPA) / 2).toFixed(2);
+            document.getElementById('cumulativeWeightedGPA').value = cumulativeWeightedGPA;
+            document.getElementById('cumulativeUnweightedGPA').value = cumulativeUnweightedGPA;
+        }
+
+        function calculateRequiredGPA() {
+            const currentWeightedGPA = parseFloat(document.getElementById('planningCurrentWeightedGPA').value);
+            const currentUnweightedGPA = parseFloat(document.getElementById('planningCurrentUnweightedGPA').value);
+            const targetWeightedGPA = parseFloat(document.getElementById('targetWeightedGPA').value);
+            const targetUnweightedGPA = parseFloat(document.getElementById('targetUnweightedGPA').value);
+
+            if (isNaN(currentWeightedGPA) || isNaN(currentUnweightedGPA) || isNaN(targetWeightedGPA) || isNaN(targetUnweightedGPA)) {
+                alert('Please enter all required GPA values for planning.');
+                return;
+            }
+
+            // Assuming a simple model for GPA planning where the target is an average of current and required GPAs
+            const requiredWeightedGPA = (2 * targetWeightedGPA - currentWeightedGPA).toFixed(5);
+            const requiredUnweightedGPA = (2 * targetUnweightedGPA - currentUnweightedGPA).toFixed(5);
+
+            document.getElementById('requiredWeightedGPA').value = requiredWeightedGPA;
+            document.getElementById('requiredUnweightedGPA').value = requiredUnweightedGPA;
+        }
+
+        function showCurrentForm() {
+            document.getElementById('currentGPAForm').style.display = 'block';
+            document.getElementById('cumulativeGPAForm').style.display = 'none';
+            document.getElementById('gpaPlanningForm').style.display = 'none';
+            document.getElementById('qAndASection').style.display = 'none'; // Hide Q&A section
+        }
+
+        function showCumulativeForm() {
+            document.getElementById('currentGPAForm').style.display = 'none';
+            document.getElementById('cumulativeGPAForm').style.display = 'block';
+            document.getElementById('gpaPlanningForm').style.display = 'none';
+            document.getElementById('qAndASection').style.display = 'none'; // Hide Q&A section
+        }
+
+        function showGPAPlanningForm() {
+            document.getElementById('currentGPAForm').style.display = 'none';
+            document.getElementById('cumulativeGPAForm').style.display = 'none';
+            document.getElementById('gpaPlanningForm').style.display = 'block';
+            document.getElementById('qAndASection').style.display = 'none'; // Hide Q&A section
+        }
+
+        function showQAndASection() {
+            document.getElementById('currentGPAForm').style.display = 'none';
+            document.getElementById('cumulativeGPAForm').style.display = 'none';
+            document.getElementById('gpaPlanningForm').style.display = 'none';
+            document.getElementById('qAndASection').style.display = 'block';
+        }
+
+        // Initialize with 7 courses
+        for (let i = 0; i < 7; i++) {
+            addCourse();
+        }
+
+        // Add event listener for the "Calculate GPA" button
+        document.getElementById('calculateButton').addEventListener('click', calculateGPA);
+
+        // Add event listener for the "Calculate Cumulative GPA" button
+        document.getElementById('calculateCumulativeButton').addEventListener('click', calculateCumulativeGPA);
+
+        // Add event listener for the "Calculate Required GPA" button
+        document.getElementById('calculateRequiredButton').addEventListener('click', calculateRequiredGPA);
+
+    </script>
+</body>
+
+</html>
